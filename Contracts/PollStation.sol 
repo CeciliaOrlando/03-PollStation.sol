@@ -1,68 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-/**
- * @title PollingStation
- * @notice A simple smart contract for voting on candidates.
- */
 contract PollingStation {
-    // --- State Variables ---
-
-    // 1. Array to store the count of votes for each candidate.
-    // The index of the array corresponds to the candidate's ID.
-    // Candidate 0 has votes[0], Candidate 1 has votes[1], etc.
-    // uint[] is used because we only need to store vote counts (unsigned integers).
     uint[] public votes;
-
-    // 2. Mapping to track which address (voter) has cast a vote.
-    // The key is the voter's address. The value is the ID of the candidate they voted for.
-    // A value of 0 will be used as the default/unvoted state if we start candidate IDs at 1.
-    // For this simple example, we'll use '0' to mean 'unvoted' and start candidate IDs at '1'.
     mapping(address => uint) public hasVoted;
 
-    // --- Constructor ---
-
-    /**
-     * @notice Initializes the contract by setting up the candidates.
-     * @param _candidateCount The total number of candidates available for voting.
-     */
     constructor(uint _candidateCount) {
-        // Initialize the 'votes' array to have a size equal to the number of candidates + 1.
-        // We add 1 so we can use candidate IDs 1, 2, 3, ... N and leave index 0 unused,
-        // which helps align with the '0' default state of the 'hasVoted' mapping.
         votes = new uint[](_candidateCount + 1);
     }
 
-    // --- Functions ---
-
-    /**
-     * @notice Allows a user to vote for a specific candidate.
-     * @param _candidateId The ID of the candidate to vote for (must be > 0).
-     */
     function vote(uint _candidateId) public {
-        // 1. Check if the voter has already voted using the mapping.
         require(hasVoted[msg.sender] == 0, "You have already voted.");
-
-        // 2. Check if the candidate ID is valid (exists in the votes array).
-        // It must be greater than 0 AND less than the length of the array.
         require(_candidateId > 0 && _candidateId < votes.length, "Invalid candidate ID.");
 
-        // 3. Record the vote in the 'votes' array.
-        // Increment the vote count for the chosen candidate ID.
         votes[_candidateId]++;
 
-        // 4. Update the 'hasVoted' mapping to prevent double voting.
-        // Store the candidate ID they voted for.
         hasVoted[msg.sender] = _candidateId;
     }
 
-    /**
-     * @notice Returns the current vote count for a specific candidate.
-     * @param _candidateId The ID of the candidate.
-     * @return The number of votes the candidate has received.
-     */
     function getVoteCount(uint _candidateId) public view returns (uint) {
-        // Ensure the ID is valid before returning the count.
         require(_candidateId > 0 && _candidateId < votes.length, "Invalid candidate ID.");
         return votes[_candidateId];
     }
